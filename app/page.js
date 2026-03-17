@@ -14,39 +14,18 @@ const G = {
 
 const PASS = process.env.NEXT_PUBLIC_INTERNAL_PASSWORD || 'rmp2025';
 
-// ─── Score ring ──────────────────────────────────────────────────────────────
-function ScoreRing({ score, grade }) {
-  const color = score >= 75 ? G.green : score >= 50 ? G.orange : G.red;
-  const r = 44, circ = 2 * Math.PI * r;
-  const dash = (score / 100) * circ;
-  return (
-    <div style={{ textAlign:'center' }}>
-      <svg width={110} height={110} viewBox="0 0 110 110">
-        <circle cx={55} cy={55} r={r} fill="none" stroke="#e8e8ec" strokeWidth={8}/>
-        <circle cx={55} cy={55} r={r} fill="none" stroke={color} strokeWidth={8}
-          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
-          transform="rotate(-90 55 55)" style={{ transition:'stroke-dasharray .6s ease' }}/>
-        <text x={55} y={50} textAnchor="middle" dominantBaseline="middle"
-          style={{ fontSize:22, fontWeight:800, fill:G.navy }}>{score}</text>
-        <text x={55} y={68} textAnchor="middle" dominantBaseline="middle"
-          style={{ fontSize:13, fontWeight:700, fill:color }}>{grade}-Grade</text>
-      </svg>
-    </div>
-  );
-}
-
-// ─── Section card ─────────────────────────────────────────────────────────────
+// ─── Section card — matches email exactly ─────────────────────────────────────
 function SectionCard({ sec }) {
   const sc = sec.score >= 75 ? G.green : sec.score >= 50 ? G.orange : G.red;
   return (
-    <div style={{ border:`1.5px solid ${G.border}`, borderRadius:10, overflow:'hidden', marginBottom:12, background:'#fff' }}>
-      <div style={{ background:G.gray1, padding:'12px 16px', display:'flex', alignItems:'center', gap:10 }}>
-        <span style={{ fontSize:18 }}>{sec.icon}</span>
+    <div style={{ border:`1.5px solid ${G.border}`, borderRadius:10, overflow:'hidden', marginBottom:16, background:'#ffffff' }}>
+      <div style={{ background:'#F4F4F4', padding:'14px 16px', display:'flex', alignItems:'center', gap:10 }}>
+        <span style={{ fontSize:18, width:30 }}>{sec.icon}</span>
         <div style={{ flex:1 }}>
-          <div style={{ fontWeight:700, fontSize:13, color:G.navy }}>{sec.title}</div>
-          <div style={{ fontSize:11, color:G.gray2 }}>{sec.subtitle}</div>
+          <div style={{ fontWeight:700, fontSize:14, color:G.navy }}>{sec.title}</div>
+          <div style={{ fontSize:11, color:G.gray2, marginTop:1 }}>{sec.subtitle}</div>
         </div>
-        <span style={{ background:`${sc}18`, color:sc, fontWeight:700, fontSize:12, padding:'3px 10px', borderRadius:100 }}>{sec.score}/100</span>
+        <span style={{ background:`${sc}20`, color:sc, fontWeight:700, fontSize:12, padding:'4px 12px', borderRadius:100 }}>{sec.score}/100</span>
       </div>
       {sec.findings.map((f, i) => {
         const icon = f.status==='good' ? '✅' : f.status==='warning' ? '⚠️' : '🔴';
@@ -54,13 +33,13 @@ function SectionCard({ sec }) {
         const bg   = f.status==='good' ? '#e8f7ed' : f.status==='warning' ? '#fff4e5' : '#fdf0ee';
         const tag  = f.status==='good' ? 'GOOD' : f.status==='warning' ? 'IMPROVE' : 'CRITICAL';
         return (
-          <div key={i} style={{ padding:'11px 16px', borderTop:`1px solid ${G.border}`, display:'flex', gap:10, alignItems:'flex-start' }}>
-            <span style={{ fontSize:15, flexShrink:0, marginTop:1 }}>{icon}</span>
+          <div key={i} style={{ padding:'12px 16px', borderTop:'1px solid #f0f0f0', display:'flex', gap:10, alignItems:'flex-start' }}>
+            <span style={{ fontSize:15, flexShrink:0, marginTop:2, width:24 }}>{icon}</span>
             <div style={{ flex:1 }}>
-              <div style={{ fontWeight:600, fontSize:12.5, color:G.navy, marginBottom:2 }}>{f.title}</div>
-              <div style={{ fontSize:11.5, color:G.gray2, lineHeight:1.5 }}>{f.desc}</div>
+              <div style={{ fontWeight:600, fontSize:13, color:G.navy, marginBottom:3 }}>{f.title}</div>
+              <div style={{ fontSize:12, color:G.gray2, lineHeight:1.5 }}>{f.desc}</div>
             </div>
-            <span style={{ background:bg, color:tc, fontSize:10, fontWeight:700, letterSpacing:.8, padding:'2px 7px', borderRadius:4, flexShrink:0, marginTop:2 }}>{tag}</span>
+            <span style={{ background:bg, color:tc, fontSize:10, fontWeight:700, letterSpacing:.8, padding:'3px 8px', borderRadius:4, flexShrink:0, marginTop:2 }}>{tag}</span>
           </div>
         );
       })}
@@ -68,27 +47,75 @@ function SectionCard({ sec }) {
   );
 }
 
-// ─── Audit Result Panel ───────────────────────────────────────────────────────
+// ─── Audit Result — mirrors the email report exactly ─────────────────────────
 function AuditResult({ result, bizName }) {
+  const gradeColor = { A:G.green, B:G.orange, C:G.amber, F:G.red }[result.grade] || G.orange;
+  const bannerUrl  = 'https://gmb-drip-k4ap.vercel.app/banner.png';
+  const bookingUrl = 'https://go.oncehub.com/rental-revenue-call';
+
   return (
-    <div style={{ marginTop:24 }}>
-      <div style={{ background:G.navy, borderRadius:12, padding:'24px 28px', marginBottom:20, display:'flex', gap:24, alignItems:'flex-start' }}>
-        <div style={{ flex:1 }}>
-          <div style={{ fontWeight:800, fontSize:17, color:'#fff', marginBottom:6 }}>{bizName}</div>
-          <div style={{ fontSize:13, color:'rgba(255,255,255,.65)', lineHeight:1.6, marginBottom:16 }}>{result.summary}</div>
-          <div style={{ borderTop:'1px solid rgba(255,255,255,.1)', paddingTop:14 }}>
-            <div style={{ fontSize:10, fontWeight:700, letterSpacing:1.5, textTransform:'uppercase', color:'rgba(255,255,255,.4)', marginBottom:10 }}>Top Priorities</div>
-            {result.topPriorities.map((p, i) => (
-              <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:10, marginBottom:8 }}>
-                <div style={{ width:22, height:22, background:G.orange, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:11, fontWeight:700, color:'#fff' }}>{i+1}</div>
-                <div style={{ fontSize:12.5, color:'rgba(255,255,255,.75)', lineHeight:1.5 }}>{p}</div>
-              </div>
-            ))}
+    <div style={{ marginTop:28, maxWidth:620, marginLeft:'auto', marginRight:'auto' }}>
+
+      {/* Banner image */}
+      <img src={bannerUrl} alt="GMB Audit"
+        style={{ width:'100%', display:'block', borderRadius:'12px 12px 0 0' }} />
+
+      {/* Navy header — score + summary + priorities */}
+      <div style={{ background:G.navy, padding:'28px 32px' }}>
+        <div style={{ display:'flex', gap:24, alignItems:'flex-start' }}>
+          <div style={{ flex:1 }}>
+            <div style={{ fontWeight:700, fontSize:18, color:'#fff', marginBottom:8 }}>{bizName}</div>
+            <div style={{ fontSize:13, color:'rgba(255,255,255,0.65)', lineHeight:1.6 }}>{result.summary}</div>
+            <div style={{ marginTop:20, borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:16 }}>
+              <div style={{ fontSize:10, fontWeight:700, letterSpacing:1.5, textTransform:'uppercase', color:'rgba(255,255,255,0.4)', marginBottom:10 }}>Top 3 Priorities</div>
+              {result.topPriorities.map((p, i) => (
+                <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:12, paddingBottom:10, borderBottom:'1px solid rgba(255,255,255,0.1)' }}>
+                  <div style={{ width:28, height:28, background:G.orange, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:12, fontWeight:700, color:'#fff' }}>{i+1}</div>
+                  <div style={{ fontSize:13, color:'rgba(255,255,255,0.8)', lineHeight:1.5, paddingTop:5 }}>{p}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Score block */}
+          <div style={{ width:130, textAlign:'center', flexShrink:0 }}>
+            <div style={{ fontSize:64, fontWeight:700, color:'#fff', lineHeight:1 }}>{result.overallScore}</div>
+            <div style={{ fontSize:18, color:'rgba(255,255,255,0.4)' }}>/100</div>
+            <div style={{ fontSize:10, fontWeight:700, letterSpacing:1.5, textTransform:'uppercase', color:'rgba(255,255,255,0.4)', marginTop:4 }}>SCORE</div>
+            <div style={{ display:'inline-block', background:`${gradeColor}30`, color:gradeColor, fontSize:13, fontWeight:700, padding:'5px 14px', borderRadius:100, marginTop:10 }}>
+              {result.grade}-Grade
+            </div>
           </div>
         </div>
-        <ScoreRing score={result.overallScore} grade={result.grade} />
       </div>
-      {result.sections.map(sec => <SectionCard key={sec.id} sec={sec} />)}
+
+      {/* White section — detailed findings */}
+      <div style={{ background:'#fff', padding:'32px', border:`1.5px solid ${G.border}`, borderTop:'none' }}>
+        <div style={{ fontSize:11, fontWeight:700, letterSpacing:1, textTransform:'uppercase', color:G.gray2, marginBottom:20 }}>
+          Detailed Findings
+        </div>
+        {result.sections.map(sec => <SectionCard key={sec.id} sec={sec} />)}
+
+        {/* CTA block */}
+        <div style={{ background:'linear-gradient(135deg,#0A2342 0%,#0d3566 100%)', borderRadius:12, marginTop:8, padding:'28px 32px', textAlign:'center' }}>
+          <div style={{ fontSize:20, fontWeight:700, color:'#fff', marginBottom:8 }}>Ready to fix these issues?</div>
+          <div style={{ fontSize:13, color:'rgba(255,255,255,0.6)', marginBottom:20, lineHeight:1.6 }}>
+            Our local SEO specialists have helped hundreds of businesses improve their Google ranking and get more qualified leads.
+          </div>
+          <a href={bookingUrl} target="_blank" rel="noreferrer"
+            style={{ display:'inline-block', background:G.orange, color:'#fff', fontSize:15, fontWeight:700, padding:'14px 32px', borderRadius:8, textDecoration:'none' }}>
+            📅 Book My Free Discovery Call
+          </a>
+          <div style={{ fontSize:11, color:'rgba(255,255,255,0.3)', marginTop:12 }}>No obligation · 15 minutes · Real recommendations</div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{ background:'#F4F4F4', padding:'20px 32px', textAlign:'center', borderRadius:'0 0 12px 12px', border:`1.5px solid ${G.border}`, borderTop:'none' }}>
+        <div style={{ fontSize:11, color:G.gray2, lineHeight:1.6 }}>
+          © 2025 Rental Marketing Pros ·{' '}
+          <a href="https://rentalmarketingpros.com" style={{ color:G.gray2 }}>rentalmarketingpros.com</a>
+        </div>
+      </div>
     </div>
   );
 }
@@ -152,13 +179,12 @@ function AuditLog() {
 
   return (
     <div>
-      {/* Stats row */}
       <div style={{ display:'flex', gap:12, marginBottom:20, flexWrap:'wrap' }}>
         {[
-          { label:'Total Audits', value: leads.length },
-          { label:'Emailed to Leads', value: sentCount },
-          { label:'Internal Runs', value: internalCount },
-          { label:'Avg Score', value: avgScore != null ? `${avgScore}/100` : '—' },
+          { label:'Total Audits',      value: leads.length },
+          { label:'Emailed to Leads',  value: sentCount },
+          { label:'Internal Runs',     value: internalCount },
+          { label:'Avg Score',         value: avgScore != null ? `${avgScore}/100` : '—' },
         ].map(s => (
           <div key={s.label} style={{ background:'#fff', border:`1.5px solid ${G.border}`, borderRadius:10, padding:'14px 20px', flex:1, minWidth:120 }}>
             <div style={{ fontSize:22, fontWeight:800, color:G.navy }}>{s.value}</div>
@@ -167,14 +193,12 @@ function AuditLog() {
         ))}
       </div>
 
-      {/* Search + refresh */}
       <div style={{ display:'flex', gap:10, marginBottom:16, alignItems:'center' }}>
-        <input
-          value={search} onChange={e => setSearch(e.target.value)}
+        <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Search by business, name, email..."
-          style={{ flex:1, padding:'9px 14px', border:`1.5px solid ${G.border}`, borderRadius:8, fontSize:13, outline:'none', fontFamily:'inherit' }}
-        />
-        <button onClick={load} style={{ padding:'9px 16px', background:G.navy, color:'#fff', border:'none', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
+          style={{ flex:1, padding:'9px 14px', border:`1.5px solid ${G.border}`, borderRadius:8, fontSize:13, outline:'none', fontFamily:'inherit' }}/>
+        <button onClick={load}
+          style={{ padding:'9px 16px', background:G.navy, color:'#fff', border:'none', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
           ↻ Refresh
         </button>
       </div>
@@ -412,8 +436,8 @@ export default function Home() {
       <div style={{ background:'#fff', borderBottom:`2px solid ${G.border}` }}>
         <div style={{ maxWidth:900, margin:'0 auto', display:'flex', padding:'0 24px' }}>
           {[
-            { id:'run',  label:'🔍 Run Audit' },
-            { id:'log',  label:'📋 Audit Log' },
+            { id:'run', label:'🔍 Run Audit' },
+            { id:'log', label:'📋 Audit Log' },
           ].map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
               style={{ padding:'14px 20px', border:'none', background:'none', cursor:'pointer', fontSize:13, fontWeight:700, fontFamily:'inherit',
