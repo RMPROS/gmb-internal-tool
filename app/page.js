@@ -54,7 +54,15 @@ function AuditResult({ result, bizName }) {
   const bookingUrl = 'https://go.oncehub.com/rental-revenue-call';
 
   return (
-    <div style={{ marginTop:28, maxWidth:620, marginLeft:'auto', marginRight:'auto' }}>
+    <div className="print-report" style={{ marginTop:28, maxWidth:620, marginLeft:'auto', marginRight:'auto' }}>
+
+      {/* Print button */}
+      <div className="no-print" style={{ display:'flex', justifyContent:'flex-end', marginBottom:12 }}>
+        <button onClick={() => window.print()}
+          style={{ display:'flex', alignItems:'center', gap:7, padding:'8px 18px', background:G.navy, color:'#fff', border:'none', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
+          🖨️ Print Report
+        </button>
+      </div>
 
       {/* Banner image */}
       <img src={bannerUrl} alt="GMB Audit"
@@ -312,6 +320,7 @@ function RunAudit() {
 
   return (
     <div>
+      <div className="no-print">
       {/* Business search */}
       <div style={{ marginBottom:16, position:'relative' }}>
         <label style={{ display:'block', fontSize:12, fontWeight:700, color:G.navy, marginBottom:6, letterSpacing:.5, textTransform:'uppercase' }}>Business Name</label>
@@ -374,6 +383,7 @@ function RunAudit() {
           : '🔍 Run GMB Audit'}
       </button>
 
+      </div>{/* end no-print */}
       {result && <AuditResult result={result} bizName={selected?.name || query} />}
     </div>
   );
@@ -420,10 +430,16 @@ export default function Home() {
         * { box-sizing: border-box; }
         body { background: ${G.gray1}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @media print {
+          .no-print { display: none !important; }
+          .print-report { margin: 0 !important; max-width: 100% !important; }
+          body { background: white !important; }
+          @page { margin: 0.5in; }
+        }
       `}</style>
 
       {/* Header */}
-      <div style={{ background:G.navy, padding:'0 24px' }}>
+      <div className="no-print" style={{ background:G.navy, padding:'0 24px' }}>
         <div style={{ maxWidth:900, margin:'0 auto', display:'flex', alignItems:'center', justifyContent:'space-between', height:56 }}>
           <div style={{ fontWeight:800, fontSize:15, color:'#fff', letterSpacing:.3 }}>
             🔍 GMB Audit — Internal Tool
@@ -433,7 +449,7 @@ export default function Home() {
       </div>
 
       {/* Tabs */}
-      <div style={{ background:'#fff', borderBottom:`2px solid ${G.border}` }}>
+      <div className="no-print" style={{ background:'#fff', borderBottom:`2px solid ${G.border}` }}>
         <div style={{ maxWidth:900, margin:'0 auto', display:'flex', padding:'0 24px' }}>
           {[
             { id:'run', label:'🔍 Run Audit' },
