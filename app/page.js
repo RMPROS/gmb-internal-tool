@@ -286,8 +286,9 @@ function RunAudit() {
   };
 
   const pick = (p) => {
-    setSelected({ name: p.description, placeId: p.place_id });
-    setQuery(p.description);
+    const bizName = p.structured_formatting?.main_text || p.description;
+    setSelected({ name: bizName, placeId: p.place_id });
+    setQuery(bizName);
     setPreds([]); setShowPreds(false);
     setResult(null);
   };
