@@ -1,5 +1,7 @@
-// Temporary debug endpoint — shows raw Places API response
-// Hit: GET /api/debug?name=A%26A+Waste+Solutions+New+Bern+NC
+// Debug endpoint — shows raw Places API response AND the exact string sent to Claude
+// GET /api/debug?name=A%26A+Waste+Solutions+New+Bern+NC
+
+import { formatPlacesDataForDebug } from '../../../lib/audit.js';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -10,7 +12,7 @@ export async function GET(request) {
   if (!apiKey) return Response.json({ error: 'No API key' }, { status: 500 });
   if (!bizName && !placeId) return Response.json({ error: 'Pass ?name= or ?placeId=' }, { status: 400 });
 
-  // Step 1: resolve placeId if not provided
+  // Resolve placeId
   let resolvedId = placeId;
   if (!resolvedId) {
     const searchRes = await fetch('https://places.googleapis.com/v1/places:searchText', {
@@ -29,13 +31,12 @@ export async function GET(request) {
 
   const placeName = resolvedId.startsWith('places/') ? resolvedId : 'places/' + resolvedId;
 
-  // Step 2: fetch full details
   const fields = [
     'id','displayName','businessStatus','rating','userRatingCount',
-    'formattedAddress','nationalPhoneNumber','websiteUri',
-    'regularOpeningHours','photos','types','primaryType',
-    'editorialSummary','reviews',
-    'googleMapsUri','primaryTypeDisplayName',
+    'formattedAddress','nationalPhoneNumber','internationalPhoneNumber',
+    'websiteUri','regularOpeningHours','photos','types','primaryType',
+    'editorialSummary','reviews','priceLevel',
+    'currentOpeningHours','regularSecondaryOpeningHours','googleMapsUri','primaryTypeDisplayName',
   ].join(',');
 
   const detailRes = await fetch(`https://places.googleapis.com/v1/${placeName}`, {
@@ -46,18 +47,21 @@ export async function GET(request) {
   });
   const data = await detailRes.json();
 
-  // Return a summary so it's easy to read
+  // Format the data block exactly as Claude sees it
+  const claudeDataBlock = formatPlacesDataForDebug(data);
+
   return Response.json({
     resolvedPlaceId: resolvedId,
-    displayName:     data.displayName?.text,
-    rating:          data.rating,
-    userRatingCount: data.userRatingCount,
-    photoCount:      data.photos?.length ?? 0,
-    reviewCount:     data.reviews?.length ?? 0,
-    hasDescription:  !!(data.editorialSummary?.text || data.businessDescription),
-    editorialSummary: data.editorialSummary?.text || null,
-    businessDescription: data.businessDescription || null,
-    reviews:         data.reviews?.slice(0,2).map(r => ({ rating: r.rating, text: r.text?.text?.substring(0,80) })) || [],
-    rawResponse:     data,
+    apiError:        data.error || null,
+    summary: {
+      displayName:     data.displayName?.text,
+      rating:          data.rating,
+      userRatingCount: data.userRatingCount,
+      photoCount:      data.photos?.length ?? 0,
+      reviewCount:     data.reviews?.length ?? 0,
+      hasEditorialSummary: !!data.editorialSummary?.text,
+    },
+    claudeDataBlock,   // <-- exactly what Claude receives
+    rawResponse: data,
   });
 }
