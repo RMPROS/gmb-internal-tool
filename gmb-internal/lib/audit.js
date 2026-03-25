@@ -89,8 +89,8 @@ function formatPlacesData(p) {
   const description    = ownDescription
     ? ownDescription
     : aiDescription
-      ? '[Owner description not returned by API. Google AI summary: (use our <a href="https://desc.rentalmarketingpros.com/" style="color:#FF8C00;font-weight:700;">Description Optimization Tool</a> to create a strong owner description)]: ' + aiDescription
-      : 'No description detected by the Google Places API. In your findings desc field, include this exact HTML link: <a href="https://desc.rentalmarketingpros.com/" style="color:#FF8C00;font-weight:700;">Description Optimization Tool</a> and tell them to use it to elevate their description.';
+      ? '[Owner description not returned by API - verify manually. Google AI summary based on reviews/public info]: ' + aiDescription
+      : 'Minimal or no description detected - verify manually in Google Business Profile';
 
   const hours = p.regularOpeningHours || p.currentOpeningHours;
 
@@ -195,7 +195,7 @@ export async function runAudit(bizName, placeId) {
     + '- Rating 4.5-5.0 = good, 4.0-4.4 = warning, below 4.0 = critical\n'
     + '- 0 photos = critical (20), 1-3 = warning (40), 4-9 = ok (65), 10 = good (80)\n'
     + '- Missing hours = critical, missing phone = warning, missing website = warning\n'
-    + '- If Description says "Minimal or no description detected", score it as warning and recommend they add a strong description. Per Google best practices a good description should: be up to 750 characters, include primary service keywords, mention the city/area served, describe what makes the business unique, and avoid promotional language or URLs. In the finding desc field include this exact HTML: <a href="https://desc.rentalmarketingpros.com/" style="color:#FF8C00;font-weight:700;">Description Optimization Tool</a> and tell them to use it to create an optimized description.\n'
+    + '- If Description says "Minimal or no description detected", score it as warning and recommend they add a strong description. Per Google best practices a good description should: be up to 750 characters, include primary service keywords, mention the city/area served, describe what makes the business unique, and avoid promotional language or URLs. Tell them to update it manually in Google Business Profile.\n'
     + '- If Description contains "Google AI summary", use it as context but still recommend they verify and update their own owner description manually in Google Business Profile using the best practices above.\n'
     + '- Each section needs exactly 3 findings\n'
     + '- Write all findings in second person: "your profile", "your photos", "your reviews"\n'
@@ -294,7 +294,7 @@ function buildEmailHtml(data, bizName, ownerName, toEmail) {
       const tc   = f.status==='good' ? '#1a8a4a' : f.status==='warning' ? '#b86200' : '#c0392b';
       const bg   = f.status==='good' ? '#e8f7ed'  : f.status==='warning' ? '#fff4e5' : '#fdf0ee';
       const tag  = f.status==='good' ? 'GOOD'     : f.status==='warning' ? 'IMPROVE' : 'CRITICAL';
-      return `<tr><td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="width:24px;vertical-align:top;padding-top:2px;">${icon}</td><td style="padding-left:10px;"><div style="font-size:13px;font-weight:600;color:#0A2342;margin-bottom:3px;">${esc(f.title)}</div><div style="font-size:12px;color:#A1A0A5;line-height:1.5;">${f.desc && f.desc.includes("desc.rentalmarketingpros.com") ? f.desc : esc(f.desc)}</div></td><td style="width:80px;text-align:right;vertical-align:top;padding-top:2px;"><span style="background:${bg};color:${tc};font-size:10px;font-weight:700;letter-spacing:0.8px;padding:3px 8px;border-radius:4px;">${tag}</span></td></tr></table></td></tr>`;
+      return `<tr><td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="width:24px;vertical-align:top;padding-top:2px;">${icon}</td><td style="padding-left:10px;"><div style="font-size:13px;font-weight:600;color:#0A2342;margin-bottom:3px;">${esc(f.title)}</div><div style="font-size:12px;color:#A1A0A5;line-height:1.5;">${esc(f.desc)}</div></td><td style="width:80px;text-align:right;vertical-align:top;padding-top:2px;"><span style="background:${bg};color:${tc};font-size:10px;font-weight:700;letter-spacing:0.8px;padding:3px 8px;border-radius:4px;">${tag}</span></td></tr></table></td></tr>`;
     }).join('');
     return `<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;border:1.5px solid #e0e0e2;border-radius:10px;overflow:hidden;background:#ffffff;"><tr style="background:#F4F4F4;"><td style="padding:14px 16px;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="font-size:18px;width:30px;">${sec.icon}</td><td style="padding-left:10px;"><div style="font-size:14px;font-weight:700;color:#0A2342;">${sec.title}</div><div style="font-size:11px;color:#A1A0A5;margin-top:1px;">${sec.subtitle}</div></td><td style="text-align:right;"><span style="background:${sc}20;color:${sc};font-size:12px;font-weight:700;padding:4px 12px;border-radius:100px;">${sec.score}/100</span></td></tr></table></td></tr>${fh}</table>`;
   }).join('');
