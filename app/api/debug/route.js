@@ -35,7 +35,7 @@ export async function GET(request) {
     'id','displayName','businessStatus','rating','userRatingCount',
     'formattedAddress','nationalPhoneNumber','internationalPhoneNumber',
     'websiteUri','regularOpeningHours','photos','types','primaryType',
-    'editorialSummary','reviews','priceLevel',
+    'editorialSummary','generativeSummary','reviews','priceLevel',
     'currentOpeningHours','regularSecondaryOpeningHours','googleMapsUri','primaryTypeDisplayName',
   ].join(',');
 

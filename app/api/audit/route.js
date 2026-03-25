@@ -51,7 +51,9 @@ export async function POST(request) {
       // Non-fatal — audit still returns
     }
 
-    return Response.json({ success: true, auditData });
+    const cleanBizName = auditData._cleanBizName || bizName;
+    delete auditData._cleanBizName;
+    return Response.json({ success: true, auditData, cleanBizName });
   } catch(e) {
     console.error('[AUDIT]', e.message);
     return Response.json({ error: e.message }, { status: 500 });

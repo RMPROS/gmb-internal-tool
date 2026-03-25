@@ -314,6 +314,7 @@ function RunAudit() {
       const d = await r.json();
       if (!d.success) throw new Error(d.error || 'Audit failed');
       setResult(d.auditData);
+      if (d.cleanBizName) setSelected(prev => ({ ...prev, name: d.cleanBizName }));
       if (doEmail && email) setEmailSent(true);
     } catch(e) { setErr(e.message); }
     finally { setRunning(false); }
