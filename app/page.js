@@ -37,7 +37,7 @@ function SectionCard({ sec }) {
             <span style={{ fontSize:15, flexShrink:0, marginTop:2, width:24 }}>{icon}</span>
             <div style={{ flex:1 }}>
               <div style={{ fontWeight:600, fontSize:13, color:G.navy, marginBottom:3 }}>{f.title}</div>
-              <div style={{ fontSize:12, color:G.gray2, lineHeight:1.5 }}>{f.desc}</div>
+              <div style={{ fontSize:12, color:G.gray2, lineHeight:1.5 }} dangerouslySetInnerHTML={{ __html: f.desc }} />
             </div>
             <span style={{ background:bg, color:tc, fontSize:10, fontWeight:700, letterSpacing:.8, padding:'3px 8px', borderRadius:4, flexShrink:0, marginTop:2 }}>{tag}</span>
           </div>
